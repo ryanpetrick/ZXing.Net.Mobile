@@ -98,24 +98,20 @@ namespace ZXing.Mobile
 			// can cope with more data or volume
 			session = new AVCaptureSession()
 			{
-				SessionPreset = AVCaptureSession.Preset640x480
+				SessionPreset = AVCaptureSession.Preset1280x720
 			};
 
 			// create a device input and attach it to the session
-			//			var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType (AVMediaType.Video);
-			AVCaptureDevice captureDevice = null;
-			var devices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
-			foreach (var device in devices)
+			var cameraPosition = AVCaptureDevicePosition.Back;
+			if (ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
+			    ScanningOptions.UseFrontCameraIfAvailable.Value)
 			{
-				captureDevice = device;
-				if (ScanningOptions.UseFrontCameraIfAvailable.HasValue &&
-					ScanningOptions.UseFrontCameraIfAvailable.Value &&
-					device.Position == AVCaptureDevicePosition.Front)
-
-					break; //Front camera successfully set
-				else if (device.Position == AVCaptureDevicePosition.Back && (!ScanningOptions.UseFrontCameraIfAvailable.HasValue || !ScanningOptions.UseFrontCameraIfAvailable.Value))
-					break; //Back camera succesfully set
+				cameraPosition = AVCaptureDevicePosition.Front; 
 			}
+			
+			var	captureDevice = AVCaptureDevice.GetDefaultDevice(AVCaptureDeviceType.BuiltInDualCamera,
+															     AVMediaTypes.MetadataObject, 
+															     cameraPosition);
 			if (captureDevice == null)
 			{
 				Console.WriteLine("No captureDevice - this won't work on the simulator, try a physical device");
